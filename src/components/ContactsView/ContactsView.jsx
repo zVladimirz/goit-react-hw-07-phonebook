@@ -1,18 +1,14 @@
 import { ContactsViewList, ContactsViewListItem } from './ContactsView.styled';
 import ContactsItems from 'components/ContactsItems';
 
-import { contactDel } from 'redux/contactsSlice';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
+import { useFetchContactsQuery } from 'redux/contactSlice';
+
 
 const ContactsView = () => {
-  const dispatch = useDispatch();
-
   const filter = useSelector(state => state.contacts.filter);
-  const contacts = useSelector(state => state.contacts.items);
 
-  const onDeleteContact = contactId => {
-    dispatch(contactDel(contactId));
-  };
+  const { data: contacts } = useFetchContactsQuery();
 
   if (!contacts) {
     return;
@@ -29,14 +25,9 @@ const ContactsView = () => {
 
   return (
     <ContactsViewList>
-      {visibleContact.map(({ id, name, number }) => (
+      {visibleContact.map(({ id, name, phone }) => (
         <ContactsViewListItem key={id}>
-          <ContactsItems
-            id={id}
-            name={name}
-            number={number}
-            onDeleteContact={onDeleteContact}
-          />
+          <ContactsItems id={id} name={name} phone={phone} />
         </ContactsViewListItem>
       ))}
     </ContactsViewList>

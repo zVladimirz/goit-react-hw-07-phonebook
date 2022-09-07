@@ -1,11 +1,13 @@
 import PropTypes from 'prop-types';
 import { ContactsViewListText } from './ContactsItems.styled';
+import { useDeleteContactsMutation } from 'redux/contactSlice';
 
-const ContactsItems = ({ id, name, number, onDeleteContact }) => {
+const ContactsItems = ({ id, name, phone }) => {
+  const [deleteContact] = useDeleteContactsMutation();
   return (
     <>
-      <ContactsViewListText>{name + ': ' + number}</ContactsViewListText>
-      <button onClick={() => onDeleteContact(id)}>Удалить</button>
+      <ContactsViewListText>{name + ': ' + phone}</ContactsViewListText>
+      <button onClick={() => deleteContact(id)}>Удалить</button>
     </>
   );
 };
@@ -13,8 +15,7 @@ const ContactsItems = ({ id, name, number, onDeleteContact }) => {
 ContactsItems.propTypes = {
   id: PropTypes.string.isRequired,
   name: PropTypes.string.isRequired,
-  number: PropTypes.string.isRequired,
-  onDeleteContact: PropTypes.func.isRequired,
+  phone: PropTypes.string.isRequired,
 };
 
 export default ContactsItems;

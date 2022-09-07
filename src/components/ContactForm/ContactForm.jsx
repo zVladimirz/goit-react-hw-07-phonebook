@@ -1,7 +1,8 @@
-import { contactAdd, filterСhange } from 'redux/contactsSlice';
-import { useSelector, useDispatch } from 'react-redux';
+import { filterСhange } from 'redux/filterSlice';
+import { useDispatch } from 'react-redux';
 
-import { nanoid } from 'nanoid';
+import { useCreateContactsMutation } from 'redux/contactSlice';
+import { useFetchContactsQuery } from 'redux/contactSlice';
 
 import { Formik, ErrorMessage } from 'formik';
 import * as yup from 'yup';
@@ -30,7 +31,7 @@ const schema = yup.object().shape({
       /^[a-zA-Zа-яА-Я]+(([' -][a-zA-Zа-яА-Я ])?[a-zA-Zа-яА-Я]*)*$/,
       "Name may contain only letters, apostrophe, dash and spaces. For example Adrian, Jacob Mercer, Charles de Batz de Castelmore d'Artagnan"
     ),
-  number: yup
+  phone: yup
     .string()
     .required()
     .matches(
@@ -41,29 +42,36 @@ const schema = yup.object().shape({
 
 const initialValues = {
   name: '',
-  number: '',
+  phone: '',
 };
 
 const ContactForm = () => {
   const dispatch = useDispatch();
+  const [createContacts] = useCreateContactsMutation();
+  const { data: contacts } = useFetchContactsQuery();
 
-  const contacts = useSelector(state => state.contacts.items);
+  if (!contacts) {
+    return;
+  }
 
-  const onSubmit = ({ name, number }, { resetForm }) => {
-    const contact = {
-      id: nanoid(),
-      name: name,
-      number: number,
-    };
-    const indexName = contacts.findIndex(contact => contact.name === name);
+  const addContact = async values => {
+    try {
+      await createContacts(values);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const onSubmit = (value, { resetForm }) => {
+    const indexName = contacts.findIndex(
+      contact => contact.name === value.name
+    );
     if (indexName === -1) {
-      dispatch(contactAdd(contact));
-
+      addContact(value);
       dispatch(filterСhange(''));
     } else {
-      alert(name + ' is already in contacts');
+      alert(value.name + ' is already in contacts');
     }
-
     resetForm();
   };
   return (
@@ -82,8 +90,8 @@ const ContactForm = () => {
         <br />
         <label htmlFor="password">
           Number <br />
-          <Input type="text" name="number" />
-          <FormError name="number" component="div" />
+          <Input type="text" name="phone" />
+          <FormError name="phone" component="div" />
         </label>
         <br />
         <DivCenter>
